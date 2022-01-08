@@ -18,7 +18,7 @@ resource "aws_lb" "example" {
 
   security_groups = [
     module.http_sg.security_group_id,
-    module.https_sg.security_group_id,
+    # module.https_sg.security_group_id,
     module.http_redirect_sg.security_group_id,
   ]
 }
@@ -53,6 +53,7 @@ module "http_sg" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
+# ドメイン取るのが面倒だったのでhttpsはスキップ
 module "https_sg" {
   source      = "./security_group"
   name        = "https-sg"
@@ -69,3 +70,39 @@ module "http_redirect_sg" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
+resource "aws_lb_target_group" "example" {
+  name                 = "example"
+  target_type          = "ip"
+  vpc_id               = aws_vpc.example.id
+  port                 = 80
+  protocol             = "HTTP"
+  deregistration_delay = 300
+
+  health_check {
+    path                = "/"
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
+    matcher             = 200
+    port                = "traffic-port"
+    protocol            = "HTTP"
+  }
+  depends_on = [aws_lb.example]
+}
+
+resource "aws_lb_listener_rule" "example" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.example.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}

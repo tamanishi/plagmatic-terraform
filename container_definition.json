@@ -1,0 +1,23 @@
+[
+    {
+        "name": "example",
+        "cpu": 256,
+        "memory": 512,
+        "image": "nginx:latest",
+        "essential": true,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-region": "ap-northeast-1",
+                "awslogs-stream-prefix": "nginx",
+                "awslogs-group": "/ecs/example"
+            }
+        },
+        "portMappings": [
+            {
+                "protocol": "tcp",
+                "containerPort": 80
+            }
+        ]
+    }
+]
