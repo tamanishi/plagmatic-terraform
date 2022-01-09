@@ -45,10 +45,27 @@ data "aws_iam_policy_document" "alb_log" {
     resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
 
     principals {
-      type        = "AWS"
+      type = "AWS"
       # fixed value for ap-northeast-1
       # see https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/classic/enable-access-logs.html
       identifiers = ["582318560864"]
     }
+  }
+}
+
+# destroy時にs3の内容を自動で削除する
+# https://qiita.com/ChaseSan/items/11fe05926c700220d3cc
+resource "null_resource" "delete_alb_log_content" {
+  triggers = {
+    bucket = aws_s3_bucket.alb_log.bucket
+  }
+
+  depends_on = [
+    aws_s3_bucket.alb_log
+  ]
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
