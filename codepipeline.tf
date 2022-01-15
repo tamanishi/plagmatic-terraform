@@ -31,6 +31,7 @@ module "codepipeline_role" {
 
 data "aws_ssm_parameter" "github_token" {
   name = "/cicd/github_token"
+  depends_on = [aws_ssm_parameter.github_token]
 }
 
 resource "aws_codepipeline" "example" {
@@ -89,7 +90,7 @@ resource "aws_codepipeline" "example" {
 
       configuration = {
         ClusterName = aws_ecs_cluster.example.name
-        ServiceName = aws_ecs_cluster.example.name
+        ServiceName = aws_ecs_service.example.name
         FileName    = "imagedefinitions.json"
       }
     }
