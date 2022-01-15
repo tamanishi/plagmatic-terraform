@@ -20,3 +20,14 @@ resource "aws_ssm_parameter" "db_password" {
     ignore_changes = [value]
   }
 }
+
+resource "aws_ssm_parameter" "github_token" {
+  name        = "/cicd/github_token"
+  value       = "uninitialized"
+  type        = "SecureString"
+  description = "ci/cdのためのtoken"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}

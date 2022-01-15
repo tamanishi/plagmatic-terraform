@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "private" {
-  bucket = "private-tamanishi-plagmatic-terraform"
+  bucket = "private-tamanishi-pragmatic-terraform"
   versioning {
     enabled = true
   }
@@ -22,7 +22,7 @@ resource "aws_s3_bucket_public_access_block" "private" {
 }
 
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "alb-log-tamanishi-plagmatic-terraform"
+  bucket = "alb-log-tamanishi-pragmatic-terraform"
 
   lifecycle_rule {
     enabled = true
@@ -62,6 +62,33 @@ resource "null_resource" "delete_alb_log_content" {
 
   depends_on = [
     aws_s3_bucket.alb_log
+  ]
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
+  }
+}
+
+resource "aws_s3_bucket" "artifact" {
+  bucket = "artifact-tamanishi-pragmatic-terraform"
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
+
+resource "null_resource" "delete_artifact_content" {
+  triggers = {
+    bucket = aws_s3_bucket.artifact.bucket
+  }
+
+  depends_on = [
+    aws_s3_bucket.artifact
   ]
 
   provisioner "local-exec" {
