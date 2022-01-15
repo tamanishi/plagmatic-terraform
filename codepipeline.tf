@@ -31,7 +31,6 @@ module "codepipeline_role" {
 
 data "aws_ssm_parameter" "github_token" {
   name = "/cicd/github_token"
-  depends_on = [aws_ssm_parameter.github_token]
 }
 
 resource "aws_codepipeline" "example" {
