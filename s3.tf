@@ -96,3 +96,30 @@ resource "null_resource" "delete_artifact_content" {
     command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
+
+resource "aws_s3_bucket" "operation" {
+  bucket = "operation-tamanishi-pragmatic-terraform"
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
+
+resource "null_resource" "delete_operation_content" {
+  triggers = {
+    bucket = aws_s3_bucket.operation.bucket
+  }
+
+  depends_on = [
+    aws_s3_bucket.operation
+  ]
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
+  }
+}
