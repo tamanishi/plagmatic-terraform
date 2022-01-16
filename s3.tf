@@ -23,6 +23,7 @@ resource "aws_s3_bucket_public_access_block" "private" {
 
 resource "aws_s3_bucket" "alb_log" {
   bucket = "alb-log-tamanishi-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true
@@ -53,25 +54,9 @@ data "aws_iam_policy_document" "alb_log" {
   }
 }
 
-# destroy時にs3の内容を自動で削除する
-# https://qiita.com/ChaseSan/items/11fe05926c700220d3cc
-resource "null_resource" "delete_alb_log_content" {
-  triggers = {
-    bucket = aws_s3_bucket.alb_log.bucket
-  }
-
-  depends_on = [
-    aws_s3_bucket.alb_log
-  ]
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
-  }
-}
-
 resource "aws_s3_bucket" "artifact" {
   bucket = "artifact-tamanishi-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true
@@ -79,26 +64,12 @@ resource "aws_s3_bucket" "artifact" {
     expiration {
       days = "180"
     }
-  }
-}
-
-resource "null_resource" "delete_artifact_content" {
-  triggers = {
-    bucket = aws_s3_bucket.artifact.bucket
-  }
-
-  depends_on = [
-    aws_s3_bucket.artifact
-  ]
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
 
 resource "aws_s3_bucket" "operation" {
   bucket = "operation-tamanishi-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true
@@ -106,26 +77,12 @@ resource "aws_s3_bucket" "operation" {
     expiration {
       days = "180"
     }
-  }
-}
-
-resource "null_resource" "delete_operation_content" {
-  triggers = {
-    bucket = aws_s3_bucket.operation.bucket
-  }
-
-  depends_on = [
-    aws_s3_bucket.operation
-  ]
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
 
 resource "aws_s3_bucket" "cloudwatch_logs" {
   bucket = "cloudwatch-logs-tamanishi-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true
@@ -133,20 +90,5 @@ resource "aws_s3_bucket" "cloudwatch_logs" {
     expiration {
       days = "180"
     }
-  }
-}
-
-resource "null_resource" "delete_cloudwatch_logs_content" {
-  triggers = {
-    bucket = aws_s3_bucket.cloudwatch_logs.bucket
-  }
-
-  depends_on = [
-    aws_s3_bucket.cloudwatch_logs
-  ]
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
