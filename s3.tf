@@ -123,3 +123,30 @@ resource "null_resource" "delete_operation_content" {
     command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
   }
 }
+
+resource "aws_s3_bucket" "cloudwatch_logs" {
+  bucket = "cloudwatch-logs-tamanishi-pragmatic-terraform"
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
+
+resource "null_resource" "delete_cloudwatch_logs_content" {
+  triggers = {
+    bucket = aws_s3_bucket.cloudwatch_logs.bucket
+  }
+
+  depends_on = [
+    aws_s3_bucket.cloudwatch_logs
+  ]
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws s3 rm s3://${self.triggers.bucket} --recursive --profile terraform"
+  }
+}
